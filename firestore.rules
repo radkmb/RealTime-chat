@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuth() {
+    return request.auth.uid != null;
+  }
+
+  function isUserAuth(userId) {
+    return request.auth.uid == userId
+  }
+
+  function require(param){
+    return request.resource.data[param] != null
+  }
+
+  function isNotEmpty(param){
+    return require(param)
+            && request.resource.data[param] is string
+            && request.resource.data[param].trim().size() != 0;
+  }
+
+  function isTimeStamp(param){
+  return require(param)
+            && request.resource.data[param] is timestamp
+  }
+
+    match /users/{userId} {
+      allow get : if isAuth();
+    allow create: if isUserAuth(userId)
+                  && isNotEmpty("name")
+                  && isNotEmpty("iconImageUrl");
+    }
+
+    match /rooms/{roomId} {
+      allow read : if isAuth();
+    allow create: if isAuth()
+                  && isNotEmpty("name")
+                  && isNotEmpty("topImageUrl")
+                  && isTimeStamp("createdAt");
+
+    match /chats/{chatId} {
+        allow read : if isAuth();
+        allow create: if isAuth()
+            && isUserAuth(request.resource.data.userId)
+            && isNotEmpty("name")
+            && isNotEmpty("iconImageUrl")
+            && isNotEmpty("body")
+            && isTimeStamp("createdAt");
+      }
+    }
+  }
+}
