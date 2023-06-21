@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "firebase": "^7.14.3",
-    "nuxt": "^2.0.0"
+    "nuxt": "^3.4.3"
   },
   "devDependencies": {
     "@firebase/testing": "^0.19.4",
